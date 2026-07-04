@@ -23,9 +23,9 @@
           display: flex; justify-content: space-between; align-items: center;
           padding: 0.8rem 2rem; z-index: 1000;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          transition: background-color 0.6s ease, box-shadow 0.6s ease;
+          transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.6s ease;
         }
-        nav.scrolled { background-color: #0d0000; }
+        nav.scrolled { background-color: #0d0000; padding: 0.5rem 2rem; }
         .nav-label { color:#fff; font-size:1.3rem; }
         .nav-links { display:flex; gap:1.5rem; margin-right:10%; }
         .nav-links a { color:#fff; text-decoration:none; font-size:1.1rem; }
@@ -34,6 +34,7 @@
         /* Home Section */
         header {
           background:url('home-bg.png') center/cover no-repeat;
+          background-attachment: fixed; /* parallax effect */
           height:100vh; display:flex; flex-direction:column;
           justify-content:center; align-items:center; text-align:center;
           position:relative;
@@ -59,11 +60,18 @@
           display:block; border-radius:12px; border:3px solid #fff;
           box-shadow:0 6px 15px rgba(0,0,0,0.2);
           transition:transform 0.3s ease, box-shadow 0.3s ease;
+          overflow:hidden; /* ensures image stays inside rounded corners */
         }
-        .gallery a:hover { transform:scale(1.05); box-shadow:0 0 25px rgba(255,255,255,0.7); }
-        .gallery img { width:100%; height:auto; display:block; }
+        .gallery a:hover { transform:scale(1.05); box-shadow:0 0 35px rgba(255,200,200,0.9); }
+        .gallery img {
+          width:100%; height:100%;
+          object-fit:cover;   /* fills box without distortion */
+          aspect-ratio:1/1;   /* keeps square preview boxes */
+          display:block;
+          border-radius:12px;
+        }
 
-        /* Lightbox overlay with fade */
+        /* Lightbox overlay */
         .lightbox {
           position:fixed; top:0; left:0; width:100%; height:100%;
           background:rgba(0,0,0,0.85);
@@ -76,20 +84,20 @@
 
         .lightbox-content {
           position:relative;
-          transform:scale(0.8);
-          transition:transform 0.4s ease;
+          display:inline-block;   /* shrink-wrap to image size */
+          max-width:90vw; max-height:90vh;
         }
-        .lightbox.active .lightbox-content { transform:scale(1); }
 
         .lightbox img {
-          max-width:90vw;  /* dynamic: fit within viewport width */
-          max-height:90vh; /* dynamic: fit within viewport height */
-          border:5px solid #fff; border-radius:12px;
-          box-shadow:0 12px 30px rgba(0,0,0,0.7);
+          width:auto; height:auto;
+          max-width:90vw; max-height:90vh;
           display:block;
+          border:0.5vw solid #fff;
+          border-radius:12px;
+          box-shadow:0 12px 30px rgba(0,0,0,0.7);
         }
 
-        /* Close button bottom-right inside image */
+        /* Close button */
         .close {
           position:absolute; bottom:10px; right:15px;
           color:#fff; font-size:1.5rem;
@@ -99,6 +107,12 @@
           border-radius:6px;
         }
         .close:hover { background:rgba(255,255,255,0.3); color:#f5cccc; }
+
+        /* Caption */
+        .caption {
+          color:#fff; text-align:center; margin-top:1rem;
+          font-size:1.2rem; font-family:'Courier New', Courier, monospace;
+        }
     </style>
 </head>
 <body>
@@ -119,21 +133,21 @@
 
 <!-- Gallery -->
 <section id="gallery" class="gallery">
-    <a href="#" data-img="Erika sitting (watermark).png"><img src="Erika sitting (watermark).png" alt="Erika sitting"></a>
-    <a href="#" data-img="Victoria The Bunny (Final).png"><img src="Victoria The Bunny (Final).png" alt="Victoria The Bunny"></a>
-    <a href="#" data-img="Sekhmet (Watermark).png"><img src="Sekhmet (Watermark).png" alt="Sekhmet"></a>
-    <a href="#" data-img="home-bg.png"><img src="home-bg.png" alt="Erika Profile"></a>
+    <a href="#" data-img="Erika sitting (watermark).png" data-caption="Erika sitting"><img src="Erika sitting (watermark).png" alt="Erika The Fennec"></a>
+    <a href="#" data-img="Victoria The Bunny (Final).png" data-caption="Victoria The Bunny"><img src="Victoria The Bunny (Final).png" alt="Victoria The Bunny"></a>
+    <a href="#" data-img="Sekhmet (Watermark).png" data-caption="Sekhmet"><img src="Sekhmet (Watermark).png" alt="Sekhmet Fan Art"></a>
 </section>
 
 <!-- Lightbox -->
-<div class="lightbox" id="lightbox">
+<div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox-content">
         <img src="" alt="Expanded view" id="lightbox-img">
         <a href="#" class="close">&times;</a>
+        <div class="caption" id="lightbox-caption"></div>
     </div>
 </div>
 
-<!-- JS for nav + lightbox -->
+<!-- JS -->
 <script>
     const nav = document.querySelector('nav');
     window.addEventListener('scroll', () => {
@@ -143,6 +157,7 @@
 
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
     const galleryLinks = document.querySelectorAll('.gallery a');
     const closeBtn = document.querySelector('.close');
 
@@ -150,20 +165,31 @@
       link.addEventListener('click', e => {
         e.preventDefault();
         const imgSrc = link.getAttribute('data-img');
+        const captionText = link.getAttribute('data-caption');
         lightboxImg.src = imgSrc;
+        lightboxCaption.textContent = captionText;
         lightbox.classList.add('active');
+        lightbox.setAttribute('aria-hidden', 'false');
       });
     });
 
     closeBtn.addEventListener('click', e => {
       e.preventDefault();
       lightbox.classList.remove('active');
+      lightbox.setAttribute('aria-hidden', 'true');
     });
 
-    // Close when clicking outside the content
     lightbox.addEventListener('click', e => {
       if (e.target === lightbox) {
         lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
       }
     });
 </script>
