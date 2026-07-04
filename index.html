@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Aeterna</title>
-    <link rel="icon" type="image/png" href="icon.png?">
+    <link rel="icon" type="image/png" href="icon.png?" />
     <style>
-        html {
-          scroll-behavior: smooth;
-          scroll-padding-top: 80px;
-        }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
         body {
           margin: 0;
           font-family: 'Courier New', Courier, monospace;
@@ -22,130 +19,173 @@
           position: fixed; top: 0; width: 100%;
           background-color: rgba(13,0,0,0.8);
           display: flex; justify-content: space-between; align-items: center;
-          padding: 0.8rem 2rem; z-index: 1000;
+          padding: 0.8rem 2rem; z-index: 1100;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
           transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.6s ease;
         }
         nav.scrolled { background-color: #0d0000; padding: 0.5rem 2rem; }
         .nav-label { color:#fff; font-size:1.3rem; }
-        .nav-links { display:flex; gap:1.5rem; margin-right:10%; }
+        .nav-links { display:flex; gap:1.5rem; margin-right:10%; align-items:center; }
         .nav-links a { color:#fff; text-decoration:none; font-size:1.1rem; }
         .nav-links a:hover { color:#f5cccc; }
 
-        /* Home Section */
+        /* Hamburger (mobile) */
+        .hamburger { display:none; font-size:2rem; background:none; border:none; color:#fff; cursor:pointer; z-index:1200; }
+
+        /* Overlay */
+        .menu-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(0,0,0,0.6); opacity: 0; visibility: hidden;
+          transition: opacity 0.4s ease; z-index: 1050;
+        }
+        .menu-overlay.active { opacity: 1; visibility: visible; }
+
+        /* Mobile menu */
+        @media (max-width: 768px) {
+          .hamburger { display: block; }
+          .nav-links {
+            position: absolute; top: 100%; left: 0; width: 100%;
+            flex-direction: column; background-color: #0d0000; padding: 1rem;
+            transform: translateY(-20px); opacity: 0; pointer-events: none;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+          }
+          .nav-links.active { transform: translateY(0); opacity: 1; pointer-events: auto; }
+          .nav-links a { padding: 0.5rem 0; font-size: 1.2rem; }
+        }
+
+        /* Home */
         header {
-          background:url('home-bg.png') center/cover no-repeat;
-          background-attachment: fixed; /* parallax effect */
-          height:100vh; display:flex; flex-direction:column;
-          justify-content:center; align-items:center; text-align:center;
-          position:relative;
+          background: url('home-bg.png') center/cover no-repeat;
+          background-attachment: fixed;
+          height: 100vh; display:flex; flex-direction:column;
+          justify-content:center; align-items:center; text-align:center; position:relative;
         }
         header::after {
           content:""; position:absolute; top:0; left:0; width:100%; height:100%;
           background:radial-gradient(circle, rgba(139,0,0,0.6) 0%, rgba(0,0,0,0.9) 100%);
         }
-        header h1, header h2 {
-          color:#fff; font-weight:normal; position:relative; z-index:1; margin:0;
-          text-shadow:2px 2px 10px rgba(0,0,0,0.7);
-        }
-        header h1 { font-size:6rem; }
-        header h2 { font-size:4rem; }
+        header h1, header h2 { color:#fff; font-weight:normal; position:relative; z-index:1; margin:0; text-shadow:2px 2px 10px rgba(0,0,0,0.7); }
+        header h1 { font-size: clamp(2.5rem, 6vw, 6rem); }
+        header h2 { font-size: clamp(1.8rem, 4vw, 4rem); }
 
         /* Gallery */
         .gallery {
           background-color:#0d0000; position:relative;
-          display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-          gap:2rem; padding:5rem 3rem;
+          display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+          gap: clamp(1rem, 2vw, 2rem);
+          padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 3vw, 3rem);
         }
         .gallery a {
           display:block; border-radius:12px; border:3px solid #fff;
           box-shadow:0 6px 15px rgba(0,0,0,0.2);
-          transition:transform 0.3s ease, box-shadow 0.3s ease;
-          overflow:hidden;
+          transition:transform 0.3s ease, box-shadow 0.3s ease; overflow:hidden; background:#111;
         }
         .gallery a:hover { transform:scale(1.05); box-shadow:0 0 35px rgba(255,200,200,0.9); }
-        .gallery img {
-          width:100%; height:100%;
-          object-fit:cover;
-          aspect-ratio:1/1;
-          display:block;
-          border-radius:12px;
-        }
+        .gallery img { width:100%; height:100%; object-fit:cover; aspect-ratio:1/1; display:block; border-radius:12px; }
 
-        /* Lightbox overlay */
+        /* Lightbox */
         .lightbox {
           position:fixed; top:0; left:0; width:100%; height:100%;
-          background:rgba(0,0,0,0.85);
-          display:flex; justify-content:center; align-items:center;
-          opacity:0; visibility:hidden;
-          transition:opacity 0.4s ease;
-          z-index:2000;
+          background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center;
+          opacity:0; visibility:hidden; transition:opacity 0.35s ease; z-index:2000;
         }
         .lightbox.active { opacity:1; visibility:visible; }
 
         .lightbox-content {
-          position:relative;
-          display:inline-block;
-          max-width:90vw; max-height:90vh;
+          position:relative; display:inline-block; max-width:90vw; max-height:90vh; text-align:center;
+          transition: transform 0.35s ease, opacity 0.35s ease;
+          will-change: transform, opacity;
         }
 
-        .lightbox img {
-          width:auto; height:auto;
-          max-width:90vw; max-height:90vh;
-          display:block;
-          border:0.5vw solid #fff;
-          border-radius:12px;
-          box-shadow:0 12px 30px rgba(0,0,0,0.7);
+        /* image layer: stable box for main image and temp overlay */
+        .img-layer {
+          position: relative;
+          display: inline-block;
+          max-width: 90vw;
+          max-height: 90vh;
+          width: auto;
+          height: auto;
         }
+        .img-layer img {
+          display: block;
+          max-width: 90vw;
+          max-height: 90vh;
+          width: auto;
+          height: auto;
+          border: 0.5vw solid #fff;
+          border-radius: 12px;
+          box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+          transition: transform 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.45s cubic-bezier(.2,.9,.2,1);
+          will-change: transform, opacity;
+          background: #000;
+        }
+
+        /* temp image absolute overlay */
+        .img-temp {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 2;
+          pointer-events: none;
+        }
+
+        /* main image sits below temp */
+        #lightbox-img { position: relative; z-index: 1; }
+
+        /* slide classes */
+        .slide-out-left { transform: translateX(-30px); opacity: 0; }
+        .slide-out-right { transform: translateX(30px); opacity: 0; }
+        .slide-in-from-right { transform: translateX(30px); opacity: 0; }
+        .slide-in-from-left { transform: translateX(-30px); opacity: 0; }
+        .slide-in-active { transform: translateX(0); opacity: 1; }
+
+        /* fade-close */
+        .fade-close { transform: scale(0.98); opacity: 0; }
 
         /* Close button */
-        .close {
-          position:absolute; bottom:10px; right:15px;
-          color:#fff; font-size:1.5rem;
-          text-decoration:none;
-          background:rgba(0,0,0,0.5);
-          padding:0.2rem 0.6rem;
-          border-radius:6px;
-        }
+        .close { position:absolute; bottom:10px; right:15px; color:#fff; font-size:1.5rem; background:rgba(0,0,0,0.5); padding:0.2rem 0.6rem; border-radius:6px; border:none; cursor:pointer; }
         .close:hover { background:rgba(255,255,255,0.3); color:#f5cccc; }
 
-        /* Caption */
-        .caption {
-          color:#fff; text-align:center; margin-top:1rem;
-          font-size:1.2rem; font-family:'Courier New', Courier, monospace;
+        .caption { color:#fff; text-align:center; margin-top:1rem; font-size:1.2rem; font-family:'Courier New', Courier, monospace; }
+
+        .prev, .next {
+          position:absolute; top:50%; transform:translateY(-50%);
+          background:rgba(0,0,0,0.5); color:#fff; font-size:clamp(1.5rem,4vw,2rem);
+          padding:clamp(0.2rem,1vw,0.4rem) clamp(0.4rem,2vw,0.8rem);
+          border:none; border-radius:6px; cursor:pointer; z-index:2010;
+        }
+        .prev { left:10px; } .next { right:10px; }
+        .prev:hover, .next:hover { background:rgba(255,255,255,0.3); color:#f5cccc; }
+
+        @media (max-width:480px) {
+          header { background-attachment: scroll; }
+          .gallery { grid-template-columns: 1fr; }
+          .caption { font-size:1rem; }
+          .prev, .next { font-size:1.4rem; padding:0.2rem 0.4rem; }
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-          width: 12px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #0d0000;
-          border-radius: 6px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #8b0000;
-          border-radius: 6px;
-          border: 2px solid #0d0000;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #f5cccc;
-        }
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #8b0000 #0d0000;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:12px; }
+        ::-webkit-scrollbar-track { background:#0d0000; border-radius:6px; }
+        ::-webkit-scrollbar-thumb { background:#8b0000; border-radius:6px; border:2px solid #0d0000; }
+        ::-webkit-scrollbar-thumb:hover { background:#f5cccc; }
+        * { scrollbar-width: thin; scrollbar-color: #8b0000 #0d0000; }
     </style>
 </head>
 <body>
 <!-- Navigation -->
 <nav>
     <div class="nav-label">KaiserCKAeterna</div>
-    <div class="nav-links">
+    <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+    <div class="nav-links" role="navigation" aria-label="Main navigation">
         <a href="#home">Home</a>
         <a href="#gallery">Gallery</a>
     </div>
 </nav>
+<div class="menu-overlay" aria-hidden="true"></div>
 
 <!-- Home -->
 <header id="home">
@@ -154,67 +194,225 @@
 </header>
 
 <!-- Gallery -->
-<section id="gallery" class="gallery">
-    <a href="#" data-img="Kit Bodega v2.png" data-caption="Kit Bodega Fan Art"><img src="Kit Bodega v2.png" alt="Kit Bodega Fan Art"></a>
-    <a href="#" data-img="Erika sitting (watermark).png" data-caption="Erika The Fennec"><img src="Erika sitting (watermark).png" alt="Erika The Fennec"></a>
-    <a href="#" data-img="Victoria The Bunny (Final).png" data-caption="Victoria The Bunny"><img src="Victoria The Bunny (Final).png" alt="Victoria The Bunny"></a>
-    <a href="#" data-img="Sekhmet (Watermark).png" data-caption="Sekhmet Fan Art"><img src="Sekhmet (Watermark).png" alt="Sekhmet Fan Art"></a>
+<section id="gallery" class="gallery" aria-label="Artwork gallery">
+    <a href="#" data-img="Kit Bodega v2.png" data-caption="Kit Bodega Fan Art"><img src="Kit Bodega v2.png" alt="Kit Bodega Fan Art" loading="lazy"></a>
+    <a href="#" data-img="Erika sitting (watermark).png" data-caption="Erika The Fennec"><img src="Erika sitting (watermark).png" alt="Erika The Fennec" loading="lazy"></a>
+    <a href="#" data-img="Victoria The Bunny (Final).png" data-caption="Victoria The Bunny"><img src="Victoria The Bunny (Final).png" alt="Victoria The Bunny" loading="lazy"></a>
+    <a href="#" data-img="Sekhmet (Watermark).png" data-caption="Sekhmet Fan Art"><img src="Sekhmet (Watermark).png" alt="Sekhmet Fan Art" loading="lazy"></a>
 </section>
 
 <!-- Lightbox -->
-<div class="lightbox" id="lightbox" aria-hidden="true">
-    <div class="lightbox-content">
-        <img src="" alt="Expanded view" id="lightbox-img">
-        <a href="#" class="close">&times;</a>
-        <div class="caption" id="lightbox-caption"></div>
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="lightbox-content" role="document">
+        <button class="prev" aria-label="Previous image">&#10094;</button>
+
+        <div class="img-layer" id="img-layer" aria-hidden="false">
+            <img id="lightbox-img" src="" alt="Expanded view" />
+        </div>
+
+        <button class="next" aria-label="Next image">&#10095;</button>
+        <button class="close" aria-label="Close lightbox">&times;</button>
+        <div class="caption" id="lightbox-caption" aria-live="polite"></div>
     </div>
 </div>
 
 <!-- JS -->
 <script>
+    // Nav scroll behavior
     const nav = document.querySelector('nav');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) nav.classList.add('scrolled');
       else nav.classList.remove('scrolled');
     });
 
+    // Mobile menu elements and helpers
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    const overlay = document.querySelector('.menu-overlay');
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+    function setNavPointerForMobile(enabled) {
+      if (isMobile()) navLinks.style.pointerEvents = enabled ? 'auto' : 'none';
+      else navLinks.style.pointerEvents = 'auto';
+    }
+    function openMenu() {
+      navLinks.classList.add('active'); overlay.classList.add('active');
+      hamburger.setAttribute('aria-expanded', 'true'); overlay.setAttribute('aria-hidden', 'false');
+      setNavPointerForMobile(true);
+    }
+    function closeMenu() {
+      navLinks.classList.remove('active'); overlay.classList.remove('active');
+      hamburger.setAttribute('aria-expanded', 'false'); overlay.setAttribute('aria-hidden', 'true');
+      setTimeout(() => { if (!navLinks.classList.contains('active')) setNavPointerForMobile(false); }, 400);
+    }
+    hamburger.addEventListener('click', () => navLinks.classList.contains('active') ? closeMenu() : openMenu());
+    overlay.addEventListener('click', closeMenu);
+    window.addEventListener('resize', () => setNavPointerForMobile(navLinks.classList.contains('active')));
+    setNavPointerForMobile(false);
+    document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { if (isMobile()) closeMenu(); }));
+
+    // Lightbox elements
     const lightbox = document.getElementById('lightbox');
+    const lightboxContent = document.querySelector('.lightbox-content');
+    const imgLayer = document.getElementById('img-layer');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxCaption = document.getElementById('lightbox-caption');
-    const galleryLinks = document.querySelectorAll('.gallery a');
+    const galleryLinks = Array.from(document.querySelectorAll('.gallery a'));
     const closeBtn = document.querySelector('.close');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
 
-    galleryLinks.forEach(link => {
-      link.addEventListener('click', e => {
+    let currentIndex = 0;
+    let animating = false;
+
+    // Helper to create temp image overlay that exactly matches main image box
+    function createTempImage(src, alt) {
+      const temp = document.createElement('img');
+      temp.className = 'img-temp';
+      temp.src = src;
+      temp.alt = alt || '';
+      // ensure it inherits sizing rules
+      temp.style.maxWidth = getComputedStyle(lightboxImg).maxWidth;
+      temp.style.maxHeight = getComputedStyle(lightboxImg).maxHeight;
+      return temp;
+    }
+
+    // immediate show (no slide)
+    function showImageImmediate(index) {
+      const link = galleryLinks[index];
+      const src = link.getAttribute('data-img');
+      const caption = link.getAttribute('data-caption') || '';
+      lightboxImg.src = src;
+      lightboxImg.alt = caption || 'Expanded view';
+      lightboxCaption.textContent = caption;
+      lightbox.classList.add('active');
+      lightbox.setAttribute('aria-hidden', 'false');
+      currentIndex = index;
+      nextBtn.focus();
+    }
+
+    // animate transition to new index with direction 'next' or 'prev'
+    function animateTo(index, direction) {
+      if (animating) return;
+      animating = true;
+
+      const link = galleryLinks[index];
+      const newSrc = link.getAttribute('data-img');
+      const newCaption = link.getAttribute('data-caption') || '';
+
+      // create temp image and place it exactly over the main image
+      const temp = createTempImage(newSrc, newCaption);
+      temp.classList.add(direction === 'next' ? 'slide-in-from-right' : 'slide-in-from-left');
+      imgLayer.appendChild(temp);
+
+      // force reflow so transitions will run
+      void temp.offsetWidth;
+
+      // animate outgoing main image and incoming temp
+      if (direction === 'next') {
+        lightboxImg.classList.add('slide-out-left');
+        temp.classList.remove('slide-in-from-right');
+        temp.classList.add('slide-in-active');
+      } else {
+        lightboxImg.classList.add('slide-out-right');
+        temp.classList.remove('slide-in-from-left');
+        temp.classList.add('slide-in-active');
+      }
+
+      // when incoming temp finishes transition, swap main image src and cleanup
+      const onTempEnd = (e) => {
+        if (e.target !== temp) return;
+        temp.removeEventListener('transitionend', onTempEnd);
+
+        // set main image to new src (temp covered the change)
+        lightboxImg.src = newSrc;
+        lightboxImg.alt = newCaption || 'Expanded view';
+        lightboxCaption.textContent = newCaption;
+
+        // remove outgoing classes from main image
+        lightboxImg.classList.remove('slide-out-left', 'slide-out-right');
+
+        // remove temp element
+        if (temp.parentNode) temp.parentNode.removeChild(temp);
+
+        // small timeout to ensure DOM settled
+        setTimeout(() => { animating = false; }, 20);
+      };
+
+      temp.addEventListener('transitionend', onTempEnd);
+
+      // update current index
+      currentIndex = index;
+    }
+
+    // close with fade animation on content
+    function closeLightbox() {
+      if (!lightbox.classList.contains('active')) return;
+      lightboxContent.classList.add('fade-close');
+
+      const onCloseEnd = (e) => {
+        if (e.target !== lightboxContent) return;
+        lightboxContent.removeEventListener('transitionend', onCloseEnd);
+        lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightboxContent.classList.remove('fade-close');
+        setTimeout(() => { lightboxImg.src = ''; }, 200);
+      };
+
+      lightboxContent.addEventListener('transitionend', onCloseEnd);
+    }
+
+    // wire thumbnails to open (use immediate open if lightbox closed)
+    galleryLinks.forEach((link, index) => {
+      link.addEventListener('click', (e) => {
         e.preventDefault();
-        const imgSrc = link.getAttribute('data-img');
-        const captionText = link.getAttribute('data-caption');
-        lightboxImg.src = imgSrc;
-        lightboxCaption.textContent = captionText;
-        lightbox.classList.add('active');
-        lightbox.setAttribute('aria-hidden', 'false');
+        if (navLinks.classList.contains('active')) closeMenu();
+        if (!lightbox.classList.contains('active')) {
+          showImageImmediate(index);
+        } else {
+          const dir = index > currentIndex ? 'next' : 'prev';
+          animateTo(index, dir === 'next' ? 'next' : 'prev');
+        }
       });
     });
 
-    closeBtn.addEventListener('click', e => {
-      e.preventDefault();
-      lightbox.classList.remove('active');
-      lightbox.setAttribute('aria-hidden', 'true');
+    // prev/next handlers
+    prevBtn.addEventListener('click', () => {
+      if (animating) return;
+      const nextIndex = (currentIndex - 1 + galleryLinks.length) % galleryLinks.length;
+      animateTo(nextIndex, 'prev');
+    });
+    nextBtn.addEventListener('click', () => {
+      if (animating) return;
+      const nextIndex = (currentIndex + 1) % galleryLinks.length;
+      animateTo(nextIndex, 'next');
     });
 
-    lightbox.addEventListener('click', e => {
-      if (e.target === lightbox) {
-        lightbox.classList.remove('active');
-        lightbox.setAttribute('aria-hidden', 'true');
+    // Close handlers
+    closeBtn.addEventListener('click', (e) => { e.preventDefault(); closeLightbox(); });
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.classList.contains('active')) {
+        if (e.key === 'Escape') closeLightbox();
+        else if (e.key === 'ArrowLeft') {
+          const nextIndex = (currentIndex - 1 + galleryLinks.length) % galleryLinks.length;
+          animateTo(nextIndex, 'prev');
+        } else if (e.key === 'ArrowRight') {
+          const nextIndex = (currentIndex + 1) % galleryLinks.length;
+          animateTo(nextIndex, 'next');
+        }
+      } else {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) closeMenu();
       }
     });
 
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        lightbox.classList.remove('active');
-        lightbox.setAttribute('aria-hidden', 'true');
-      }
+    // Prevent background scroll when lightbox is open
+    const observer = new MutationObserver(() => {
+      if (lightbox.classList.contains('active')) document.body.style.overflow = 'hidden';
+      else document.body.style.overflow = '';
     });
+    observer.observe(lightbox, { attributes: true, attributeFilter: ['class'] });
 </script>
 </body>
 </html>
