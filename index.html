@@ -28,19 +28,29 @@
         nav {
           position: fixed; top: 0; width: 100%;
           background-color: rgba(13,0,0,0.8);
-          display: flex; justify-content: space-between; align-items: center;
+          display: flex; align-items: center; gap: 0.5rem;
           padding: 0.8rem 2rem; z-index: 1100;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
           transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.6s ease;
+          justify-content: space-between;
         }
         nav.scrolled { background-color: #0d0000; padding: 0.5rem 2rem; }
-        .nav-label { color:#fff; font-size:1.3rem; }
-        .nav-links { display:flex; gap:1.5rem; margin-right:10%; align-items:center; }
+        .nav-label { color:#fff; font-size:1.3rem; margin-left:0.1rem; flex:0 0 auto; }
+        .nav-links { display:flex; gap:1.5rem; margin-right:0; align-items:center; }
         .nav-links a { color:#fff; text-decoration:none; font-size:1.1rem; }
         .nav-links a:hover { color:#f5cccc; }
 
         /* Hamburger (mobile) */
-        .hamburger { display:none; font-size:2rem; background:none; border:none; color:#fff; cursor:pointer; z-index:1200; }
+        .hamburger {
+          display:none;
+          background:none;
+          border:none;
+          padding:0.25rem;
+          cursor:pointer;
+          z-index:1200;
+          transition: transform 0.4s cubic-bezier(.2,.9,.2,1);
+        }
+        .hamburger img { display:block; width:28px; height:28px; }
 
         /* Overlay */
         .menu-overlay {
@@ -50,7 +60,7 @@
         }
         .menu-overlay.active { opacity: 1; visibility: visible; }
 
-        /* Mobile menu */
+        /* Mobile menu (legacy fallback) */
         @media (max-width: 768px) {
           .hamburger { display: block; }
           .nav-links {
@@ -185,61 +195,51 @@
         * { scrollbar-width: thin; scrollbar-color: #8b0000 #0d0000; }
 
         /* -------------------------
-           Mobile hamburger & menu edits
+           Mobile hamburger & menu edits (final)
            ------------------------- */
-
-        /* ensure hamburger sits leftmost and label follows */
-        nav { display:flex; align-items:center; gap:1rem; justify-content:space-between; }
-
-        /* hamburger as image button */
-        .hamburger {
-          display:none;
-          background:none;
-          border:none;
-          padding:0.25rem;
-          cursor:pointer;
-          z-index:1200;
-          transition: transform 0.4s cubic-bezier(.2,.9,.2,1);
-        }
-        .hamburger img { display:block; width:28px; height:28px; }
 
         /* mobile layout adjustments */
         @media (max-width: 768px) {
+          /* reduce nav horizontal padding to avoid visual gaps */
+          nav { padding-left: 0.6rem; padding-right: 0.6rem; }
+
           /* show hamburger on mobile and place it at the far left */
-          .hamburger { display:block; order: -1; margin-left: 0.5rem; }
+          .hamburger { display:block; order: -1; margin-left: 0.25rem; }
 
           /* keep label next to hamburger */
-          .nav-label { order: 0; font-size:1.1rem; color:#fff; margin-left:0.25rem; }
+          .nav-label { order: 0; font-size:1.1rem; color:#fff; margin-left:0.15rem; }
 
-          /* nav-links slide panel: start slightly off-canvas to the left and left-align items */
+          /* panel spans full viewport and starts fully off-canvas to the left */
           .nav-links {
-            position: absolute;
-            top: 100%;
+            position: fixed;
+            top: calc(100%); /* sits below the nav bar */
             left: 0;
-            width: 100%;
+            width: 100vw; /* full viewport width to avoid any left gap */
+            max-width: 100vw;
+            box-sizing: border-box;
             flex-direction: column;
             background-color: #0d0000;
             padding: 1rem 1rem 1.5rem 1rem;
-            transform: translateX(-6%); /* slight left offset when closed */
+            transform: translateX(-100%); /* fully hidden off-screen left */
             opacity: 0;
             pointer-events: none;
-            transition: transform 0.4s ease, opacity 0.4s ease;
+            transition: transform 0.36s cubic-bezier(.2,.9,.2,1), opacity 0.36s ease;
             align-items: flex-start; /* left-align links */
+            z-index: 1150;
           }
 
-          /* when active: slide slightly right and reveal with left indent */
+          /* when active: slide into view; keep hamburger stationary */
           .nav-links.active {
-            transform: translateX(6%); /* slides to the right when opened */
+            transform: translateX(0); /* fully visible, no left gap */
             opacity: 1;
             pointer-events: auto;
             padding-left: 2rem; /* left indent for links */
           }
 
-          /* larger tap targets and left-aligned links */
           .nav-links a { padding: 0.75rem 0; font-size: 1.15rem; text-align: left; width:100%; }
 
-          /* animate hamburger sliding right when menu is open */
-          .hamburger.open { transform: translateX(48px); } /* adjust px to taste */
+          /* ensure hamburger does not translate horizontally */
+          .hamburger.open { transform: none; }
         }
     </style>
 </head>
@@ -247,7 +247,7 @@
 <!-- Navigation -->
 <nav>
     <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
-        <img src="icon.png" alt="Menu" width="28" height="28" />
+        <img src="menu-icon.png" alt="Menu" width="28" height="28" />
     </button>
     <div class="nav-label">KaiserCKAeterna</div>
     <div class="nav-links" role="navigation" aria-label="Main navigation">
@@ -310,15 +310,17 @@
       else navLinks.style.pointerEvents = 'auto';
     }
     function openMenu() {
-      navLinks.classList.add('active'); overlay.classList.add('active');
-      hamburger.setAttribute('aria-expanded', 'true'); overlay.setAttribute('aria-hidden', 'false');
-      hamburger.classList.add('open'); // slide hamburger right
+      navLinks.classList.add('active');
+      overlay.classList.add('active');
+      hamburger.setAttribute('aria-expanded', 'true');
+      overlay.setAttribute('aria-hidden', 'false');
       setNavPointerForMobile(true);
     }
     function closeMenu() {
-      navLinks.classList.remove('active'); overlay.classList.remove('active');
-      hamburger.setAttribute('aria-expanded', 'false'); overlay.setAttribute('aria-hidden', 'true');
-      hamburger.classList.remove('open'); // slide hamburger back
+      navLinks.classList.remove('active');
+      overlay.classList.remove('active');
+      hamburger.setAttribute('aria-expanded', 'false');
+      overlay.setAttribute('aria-hidden', 'true');
       setTimeout(() => { if (!navLinks.classList.contains('active')) setNavPointerForMobile(false); }, 400);
     }
     hamburger.addEventListener('click', () => navLinks.classList.contains('active') ? closeMenu() : openMenu());
