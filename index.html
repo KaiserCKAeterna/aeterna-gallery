@@ -183,13 +183,73 @@
         ::-webkit-scrollbar-thumb { background:#8b0000; border-radius:6px; border:2px solid #0d0000; }
         ::-webkit-scrollbar-thumb:hover { background:#f5cccc; }
         * { scrollbar-width: thin; scrollbar-color: #8b0000 #0d0000; }
+
+        /* -------------------------
+           Mobile hamburger & menu edits
+           ------------------------- */
+
+        /* ensure hamburger sits leftmost and label follows */
+        nav { display:flex; align-items:center; gap:1rem; justify-content:space-between; }
+
+        /* hamburger as image button */
+        .hamburger {
+          display:none;
+          background:none;
+          border:none;
+          padding:0.25rem;
+          cursor:pointer;
+          z-index:1200;
+          transition: transform 0.4s cubic-bezier(.2,.9,.2,1);
+        }
+        .hamburger img { display:block; width:28px; height:28px; }
+
+        /* mobile layout adjustments */
+        @media (max-width: 768px) {
+          /* show hamburger on mobile and place it at the far left */
+          .hamburger { display:block; order: -1; margin-left: 0.5rem; }
+
+          /* keep label next to hamburger */
+          .nav-label { order: 0; font-size:1.1rem; color:#fff; margin-left:0.25rem; }
+
+          /* nav-links slide panel: start slightly off-canvas to the left and left-align items */
+          .nav-links {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            flex-direction: column;
+            background-color: #0d0000;
+            padding: 1rem 1rem 1.5rem 1rem;
+            transform: translateX(-6%); /* slight left offset when closed */
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            align-items: flex-start; /* left-align links */
+          }
+
+          /* when active: slide slightly right and reveal with left indent */
+          .nav-links.active {
+            transform: translateX(6%); /* slides to the right when opened */
+            opacity: 1;
+            pointer-events: auto;
+            padding-left: 2rem; /* left indent for links */
+          }
+
+          /* larger tap targets and left-aligned links */
+          .nav-links a { padding: 0.75rem 0; font-size: 1.15rem; text-align: left; width:100%; }
+
+          /* animate hamburger sliding right when menu is open */
+          .hamburger.open { transform: translateX(48px); } /* adjust px to taste */
+        }
     </style>
 </head>
 <body>
 <!-- Navigation -->
 <nav>
+    <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <img src="icon.png" alt="Menu" width="28" height="28" />
+    </button>
     <div class="nav-label">KaiserCKAeterna</div>
-    <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
     <div class="nav-links" role="navigation" aria-label="Main navigation">
         <a href="#home">Home</a>
         <a href="#gallery">Gallery</a>
@@ -252,11 +312,13 @@
     function openMenu() {
       navLinks.classList.add('active'); overlay.classList.add('active');
       hamburger.setAttribute('aria-expanded', 'true'); overlay.setAttribute('aria-hidden', 'false');
+      hamburger.classList.add('open'); // slide hamburger right
       setNavPointerForMobile(true);
     }
     function closeMenu() {
       navLinks.classList.remove('active'); overlay.classList.remove('active');
       hamburger.setAttribute('aria-expanded', 'false'); overlay.setAttribute('aria-hidden', 'true');
+      hamburger.classList.remove('open'); // slide hamburger back
       setTimeout(() => { if (!navLinks.classList.contains('active')) setNavPointerForMobile(false); }, 400);
     }
     hamburger.addEventListener('click', () => navLinks.classList.contains('active') ? closeMenu() : openMenu());
