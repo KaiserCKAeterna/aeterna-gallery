@@ -6,13 +6,12 @@
   <title>Aeterna's Gallery</title>
   <link rel="icon" type="image/png" href="icon.png?" />
   <style>
-    :root {
-      --nav-height: 64px;
-      --nav-padding-x: 0.6rem;
+    :root{
+      --nav-height:64px;
       --nav-bg: rgba(13,0,0,0.8);
+      --dark: #0d0000;
       --accent: #8b0000;
       --light: #f5cccc;
-      --dark: #0d0000;
     }
 
     html { scroll-behavior: smooth; scroll-padding-top: var(--nav-height); }
@@ -23,99 +22,84 @@
       color: var(--accent);
     }
 
-    /* Navigation Bar */
-    nav {
+    /* ---------- Desktop / default navigation (unchanged behavior) ---------- */
+    nav.main-nav {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: var(--nav-height);
       background-color: var(--nav-bg);
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0 2rem;
-      z-index: 1200;
+      padding: 0.8rem 2rem;
+      z-index: 1100;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.3s ease;
+      transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.6s ease;
       box-sizing: border-box;
+      height: var(--nav-height);
     }
-    nav.scrolled { background-color: var(--dark); padding: 0 1.2rem; }
+    nav.main-nav.scrolled { background-color: var(--dark); padding: 0.5rem 2rem; }
 
-    /* label and layout */
     .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      flex: 0 0 auto;
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
       min-width: 0;
     }
-    .nav-label {
-      color: #fff;
-      font-size: 1.15rem;
-      margin-left: 0.15rem;
-      white-space: nowrap;
-      overflow: visible;
-      text-overflow: ellipsis;
-      max-width: calc(100vw - 140px); /* keep label from overflowing on tiny screens */
-    }
 
-    /* Desktop links */
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      margin-left: auto;
-      margin-right: 0;
-    }
-    .nav-links a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.05rem;
-      padding: 0.25rem 0.5rem;
-    }
-    .nav-links a:hover { color: var(--light); }
-
-    /* Hamburger (mobile) */
     .hamburger {
-      display: none;
+      display: none; /* hidden on desktop */
       background: none;
       border: none;
       padding: 0.25rem;
       cursor: pointer;
       z-index: 1250;
-      background-color: transparent;
     }
-    .hamburger img { display:block; width:28px; height:28px; }
+    .hamburger img { width:28px; height:28px; display:block; }
 
-    /* Overlay */
+    .nav-label {
+      color:#fff;
+      font-size:1.3rem;
+      margin-left:0.25rem;
+      white-space: nowrap;
+      overflow: visible;
+    }
+
+    .nav-links {
+      display:flex;
+      gap:1.5rem;
+      align-items:center;
+      margin-right: 0;
+    }
+    .nav-links a {
+      color:#fff;
+      text-decoration:none;
+      font-size:1.1rem;
+    }
+    .nav-links a:hover { color: var(--light); }
+
+    /* overlay (desktop/mobile shared) */
     .menu-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.45);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.28s ease;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.4s ease;
       z-index: 1140;
     }
     .menu-overlay.active { opacity: 1; visibility: visible; }
 
-    /* Mobile menu panel (final) */
+    /* ---------- Mobile-only styles (all changes confined here) ---------- */
     @media (max-width: 768px) {
-      nav { padding: 0 var(--nav-padding-x); }
+      /* show hamburger and keep it left-most; desktop nav-links hidden */
+      .hamburger { display: block; order: -1; margin-left: 0.25rem; }
+      .nav-links { display: none; } /* desktop links hidden on mobile */
 
-      .hamburger { display: block; order: -1; margin-left: 0; }
+      /* tighten label so it sits close to hamburger */
+      .nav-label { font-size:1.05rem; margin-left:0.12rem; max-width: calc(100vw - 96px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-      /* keep label next to hamburger in the left group */
-      .nav-left { margin-left: 0.25rem; }
-
-      /* hide desktop links (they will be in the sliding panel) */
-      .nav-links { display: none; }
-
-      /* sliding panel: full viewport width, positioned directly below nav */
+      /* mobile sliding panel: full-width, slides from left, sits below nav bar */
       .mobile-panel {
         position: fixed;
         top: var(--nav-height);
@@ -126,7 +110,7 @@
         background-color: var(--dark);
         box-sizing: border-box;
         padding: 1rem 1rem 1.5rem 1rem;
-        transform: translateX(-100%);
+        transform: translateX(-100%); /* hidden off-screen left */
         opacity: 0;
         pointer-events: none;
         transition: transform 0.36s cubic-bezier(.2,.9,.2,1), opacity 0.28s ease;
@@ -155,11 +139,11 @@
       }
       .mobile-panel a:hover { color: var(--light); }
 
-      /* ensure the nav label doesn't clip: allow it to shrink but not wrap awkwardly */
-      .nav-label { font-size: 1.05rem; max-width: calc(100vw - 96px); }
+      /* reduce nav horizontal padding on small screens to avoid visual gaps */
+      nav.main-nav { padding-left: 0.6rem; padding-right: 0.6rem; }
     }
 
-    /* Home */
+    /* ---------- Other page styles (unchanged) ---------- */
     header {
       background: url('home-bg.png') center/cover no-repeat;
       background-attachment: fixed;
@@ -173,18 +157,13 @@
     }
     header::after {
       content:"";
-      position:absolute;
-      top:0; left:0; width:100%; height:100%;
+      position:absolute; top:0; left:0; width:100%; height:100%;
       background:radial-gradient(circle, rgba(139,0,0,0.6) 0%, rgba(0,0,0,0.9) 100%);
     }
-    header h1, header h2 {
-      color:#fff; font-weight:normal; position:relative; z-index:1; margin:0;
-      text-shadow:2px 2px 10px rgba(0,0,0,0.7);
-    }
+    header h1, header h2 { color:#fff; font-weight:normal; position:relative; z-index:1; margin:0; text-shadow:2px 2px 10px rgba(0,0,0,0.7); }
     header h1 { font-size: clamp(2.5rem, 6vw, 6rem); }
     header h2 { font-size: clamp(1.8rem, 4vw, 4rem); }
 
-    /* Gallery */
     .gallery {
       background-color: var(--dark);
       position:relative;
@@ -201,7 +180,6 @@
     .gallery a:hover { transform:scale(1.05); box-shadow:0 0 35px rgba(255,200,200,0.9); }
     .gallery img { width:100%; height:100%; object-fit:cover; aspect-ratio:1/1; display:block; border-radius:12px; }
 
-    /* Lightbox */
     .lightbox {
       position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center;
@@ -215,7 +193,32 @@
       will-change: transform, opacity;
     }
 
-    /* misc */
+    .img-layer { position: relative; display:inline-block; max-width:90vw; max-height:90vh; }
+    .img-layer img {
+      display:block; max-width:90vw; max-height:90vh; border: 0.5vw solid #fff; border-radius:12px;
+      box-shadow:0 12px 30px rgba(0,0,0,0.7); transition: transform 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.45s cubic-bezier(.2,.9,.2,1);
+      background:#000;
+    }
+    .img-temp { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:2; pointer-events:none; }
+    #lightbox-img { position: relative; z-index:1; }
+
+    .slide-out-left { transform: translateX(-30px); opacity: 0; }
+    .slide-out-right { transform: translateX(30px); opacity: 0; }
+    .slide-in-from-right { transform: translateX(30px); opacity: 0; }
+    .slide-in-from-left { transform: translateX(-30px); opacity: 0; }
+    .slide-in-active { transform: translateX(0); opacity: 1; }
+
+    .fade-close { transform: scale(0.98); opacity: 0; }
+
+    .prev, .next {
+      position:absolute; top:50%; transform:translateY(-50%);
+      background:rgba(0,0,0,0.5); color:#fff; font-size:clamp(1.5rem,4vw,2rem);
+      padding:clamp(0.2rem,1vw,0.4rem) clamp(0.4rem,2vw,0.8rem);
+      border:none; border-radius:6px; cursor:pointer; z-index:2010;
+    }
+    .prev { left:10px; } .next { right:10px; }
+    .prev:hover, .next:hover { background:rgba(255,255,255,0.3); color:var(--light); }
+
     .caption { color:#fff; text-align:center; margin-top:1rem; font-size:1.2rem; font-family:'Courier New', Courier, monospace; }
     .close { position:absolute; bottom:10px; right:15px; color:#fff; font-size:1.5rem; background:rgba(0,0,0,0.5); padding:0.2rem 0.6rem; border-radius:6px; border:none; cursor:pointer; }
     .close:hover { background:rgba(255,255,255,0.3); color:var(--light); }
@@ -229,23 +232,22 @@
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav>
+  <!-- Navigation (desktop/default) -->
+  <nav class="main-nav" role="navigation" aria-label="Main navigation">
     <div class="nav-left">
       <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
-        <img src="icon.png" alt="Menu" width="28" height="28" />
+        <img src="menu-icon.png" alt="Menu" width="28" height="28" />
       </button>
       <div class="nav-label">KaiserCKAeterna</div>
     </div>
 
-    <!-- Desktop links (visible on wide screens) -->
-    <div class="nav-links" role="navigation" aria-label="Main navigation">
+    <div class="nav-links">
       <a href="#home">Home</a>
       <a href="#gallery">Gallery</a>
     </div>
   </nav>
 
-  <!-- overlay and mobile panel -->
+  <!-- overlay and mobile-only sliding panel -->
   <div class="menu-overlay" aria-hidden="true"></div>
 
   <nav class="mobile-panel" id="mobilePanel" aria-hidden="true">
@@ -282,21 +284,21 @@
     </div>
   </div>
 
-  <!-- Copyright Notice -->
+  <!-- Footer -->
   <footer style="text-align:center; padding:1rem; background:var(--dark); color:#fff; font-family:'Courier New', Courier, monospace;">
     © 2026 KaiserCKAeterna
   </footer>
 
   <!-- JS -->
   <script>
-    // Nav scroll behavior
-    const nav = document.querySelector('nav');
+    // Nav scroll behavior (applies to main-nav)
+    const mainNav = document.querySelector('nav.main-nav');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) nav.classList.add('scrolled');
-      else nav.classList.remove('scrolled');
+      if (window.scrollY > 50) mainNav.classList.add('scrolled');
+      else mainNav.classList.remove('scrolled');
     });
 
-    // Mobile menu elements and helpers
+    // Mobile menu elements and helpers (mobile-only behavior)
     const hamburger = document.querySelector('.hamburger');
     const mobilePanel = document.getElementById('mobilePanel');
     const desktopLinks = document.querySelector('.nav-links');
@@ -347,7 +349,7 @@
     window.addEventListener('resize', handleResize);
     handleResize();
 
-    // Lightbox elements
+    // Lightbox elements (unchanged)
     const lightbox = document.getElementById('lightbox');
     const lightboxContent = document.querySelector('.lightbox-content');
     const imgLayer = document.getElementById('img-layer');
