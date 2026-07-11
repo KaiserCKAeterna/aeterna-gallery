@@ -1,355 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Aeterna's Gallery</title>
-  <link rel="icon" type="image/png" href="icon.png?" />
-  <style>
-    :root{
-      --nav-height:64px;
-      --nav-bg: rgba(13,0,0,0.8);
-      --dark: #0d0000;
-      --accent: #8b0000;
-      --light: #f5cccc;
-    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kaiserckaeterna.github.io/aeterna-gallery" />
+    <meta property="og:title" content="Aeterna's Gallery" />
+    <meta property="og:description" content="KaiserCKAeterna's Art Gallery" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/KaiserCKAeterna/aeterna-gallery/refs/heads/main/META.PNG" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://kaiserckaeterna.github.io/aeterna-gallery" />
+    <meta property="twitter:title" content="Aeterna's Gallery" />
+    <meta property="twitter:description" content="KaiserCKAeterna's Art Gallery" />
+    <meta property="twitter:image" content="https://raw.githubusercontent.com/KaiserCKAeterna/aeterna-gallery/refs/heads/main/META.PNG" />
+    <title>Aeterna's Gallery</title>
+    <link rel="icon" type="image/png" href="icon.png?" />
+    <style>
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body {
+          margin: 0;
+          font-family: 'Courier New', Courier, monospace;
+          background-color: #fff;
+          color: #8b0000;
+        }
 
-    html { scroll-behavior: smooth; scroll-padding-top: var(--nav-height); }
-    body {
-      margin: 0;
-      font-family: 'Courier New', Courier, monospace;
-      background-color: #fff;
-      color: var(--accent);
-    }
+        /* Navigation Bar (desktop/default) */
+        nav {
+          position: fixed; top: 0; width: 100%;
+          background-color: rgba(13,0,0,0.8);
+          display: flex; justify-content: space-between; align-items: center;
+          padding: 0.8rem 2rem; z-index: 1100;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.6s ease;
+        }
+        nav.scrolled { background-color: #0d0000; padding: 0.5rem 2rem; }
+        .nav-label { color:#fff; font-size:1.3rem; }
+        .nav-links { display:flex; gap:1.5rem; margin-right:10%; align-items:center; }
+        .nav-links a { color:#fff; text-decoration:none; font-size:1.1rem; }
+        .nav-links a:hover { color:#f5cccc; }
 
-    /* ---------- Desktop / default navigation (unchanged behavior) ---------- */
-    nav.main-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background-color: var(--nav-bg);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.8rem 2rem;
-      z-index: 1100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: background-color 0.6s ease, box-shadow 0.6s ease, padding 0.6s ease;
-      box-sizing: border-box;
-      height: var(--nav-height);
-    }
-    nav.main-nav.scrolled { background-color: var(--dark); padding: 0.5rem 2rem; }
+        /* Hamburger (mobile) - default hidden on desktop */
+        .hamburger {
+          display:none;
+          background:none;
+          border:none;
+          padding:0.25rem;
+          cursor:pointer;
+          z-index:1200;
+        }
+        .hamburger img { display:block; width:28px; height:28px; }
 
-    .nav-left {
-      display:flex;
-      align-items:center;
-      gap:0.5rem;
-      min-width: 0;
-    }
+        /* Overlay */
+        .menu-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(0,0,0,0.6); opacity: 0; visibility: hidden;
+          transition: opacity 0.4s ease; z-index: 1050;
+        }
+        .menu-overlay.active { opacity: 1; visibility: visible; }
 
-    .hamburger {
-      display: none; /* hidden on desktop */
-      background: none;
-      border: none;
-      padding: 0.25rem;
-      cursor: pointer;
-      z-index: 1250;
-    }
-    .hamburger img { width:28px; height:28px; display:block; }
+        /* Mobile-only adjustments (no desktop changes) */
+        @media (max-width: 768px) {
+          /* show hamburger and place it left-most */
+          .hamburger { display: block; order: -1; margin-left: 0; }
 
-    .nav-label {
-      color:#fff;
-      font-size:1.3rem;
-      margin-left:0.25rem;
-      white-space: nowrap;
-      overflow: visible;
-    }
+          /* bring label closer to hamburger */
+          .nav-label { margin-left: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100vw - 120px); }
 
-    .nav-links {
-      display:flex;
-      gap:1.5rem;
-      align-items:center;
-      margin-right: 0;
-    }
-    .nav-links a {
-      color:#fff;
-      text-decoration:none;
-      font-size:1.1rem;
-    }
-    .nav-links a:hover { color: var(--light); }
+          /* mobile menu: keep same DOM element (.nav-links) but override layout for mobile */
+          .nav-links {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            flex-direction: column;
+            background-color: #0d0000;
+            padding: 1rem;
+            transform: translateY(-20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            align-items: flex-start; /* left-align items on mobile */
+          }
 
-    /* overlay (desktop/mobile shared) */
-    .menu-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      opacity: 0; visibility: hidden;
-      transition: opacity 0.4s ease;
-      z-index: 1140;
-    }
-    .menu-overlay.active { opacity: 1; visibility: visible; }
+          /* when opened: reveal and left-indent links */
+          .nav-links.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+            padding-left: 1.25rem; /* left indent so items are visibly left-aligned */
+          }
 
-    /* ---------- Mobile-only styles (all changes confined here) ---------- */
-    @media (max-width: 768px) {
-      /* show hamburger and keep it left-most; desktop nav-links hidden */
-      .hamburger { display: block; order: -1; margin-left: 0.25rem; }
-      .nav-links { display: none; } /* desktop links hidden on mobile */
+          /* left-align link text and increase tap area */
+          .nav-links a {
+            padding: 0.75rem 0;
+            font-size: 1.15rem;
+            text-align: left;
+            width: 100%;
+            color: #fff;
+          }
+        }
 
-      /* tighten label so it sits close to hamburger */
-      .nav-label { font-size:1.05rem; margin-left:0.12rem; max-width: calc(100vw - 96px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Home */
+        header {
+          background: url('home-bg.png') center/cover no-repeat;
+          background-attachment: fixed;
+          height: 100vh; display:flex; flex-direction:column;
+          justify-content:center; align-items:center; text-align:center; position:relative;
+        }
+        header::after {
+          content:""; position:absolute; top:0; left:0; width:100%; height:100%;
+          background:radial-gradient(circle, rgba(139,0,0,0.6) 0%, rgba(0,0,0,0.9) 100%);
+        }
+        header h1, header h2 { color:#fff; font-weight:normal; position:relative; z-index:1; margin:0; text-shadow:2px 2px 10px rgba(0,0,0,0.7); }
+        header h1 { font-size: clamp(2.5rem, 6vw, 6rem); }
+        header h2 { font-size: clamp(1.8rem, 4vw, 4rem); }
 
-      /* mobile sliding panel: full-width, slides from left, sits below nav bar */
-      .mobile-panel {
-        position: fixed;
-        top: var(--nav-height);
-        left: 0;
-        width: 100vw;
-        max-width: 100vw;
-        height: calc(100vh - var(--nav-height));
-        background-color: var(--dark);
-        box-sizing: border-box;
-        padding: 1rem 1rem 1.5rem 1rem;
-        transform: translateX(-100%); /* hidden off-screen left */
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.36s cubic-bezier(.2,.9,.2,1), opacity 0.28s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-        z-index: 1160;
-        overflow-y: auto;
-      }
+        /* Gallery */
+        .gallery {
+          background-color:#0d0000; position:relative;
+          display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+          gap: clamp(1rem, 2vw, 2rem);
+          padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 3vw, 3rem);
+        }
+        .gallery a {
+          display:block; border-radius:12px; border:3px solid #fff;
+          box-shadow:0 6px 15px rgba(0,0,0,0.2);
+          transition:transform 0.3s ease, box-shadow 0.3s ease; overflow:hidden; background:#111;
+        }
+        .gallery a:hover { transform:scale(1.05); box-shadow:0 0 35px rgba(255,200,200,0.9); }
+        .gallery img { width:100%; height:100%; object-fit:cover; aspect-ratio:1/1; display:block; border-radius:12px; }
 
-      .mobile-panel.active {
-        transform: translateX(0);
-        opacity: 1;
-        pointer-events: auto;
-        padding-left: 2rem; /* left indent for links */
-      }
+        /* Lightbox */
+        .lightbox {
+          position:fixed; top:0; left:0; width:100%; height:100%;
+          background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center;
+          opacity:0; visibility:hidden; transition:opacity 0.35s ease; z-index:2000;
+        }
+        .lightbox.active { opacity:1; visibility:visible; }
 
-      .mobile-panel a {
-        color: #fff;
-        text-decoration: none;
-        font-size: 1.15rem;
-        padding: 0.75rem 0;
-        width: 100%;
-        text-align: left;
-      }
-      .mobile-panel a:hover { color: var(--light); }
+        .lightbox-content {
+          position:relative; display:inline-block; max-width:90vw; max-height:90vh; text-align:center;
+          transition: transform 0.35s ease, opacity 0.35s ease;
+          will-change: transform, opacity;
+        }
 
-      /* reduce nav horizontal padding on small screens to avoid visual gaps */
-      nav.main-nav { padding-left: 0.6rem; padding-right: 0.6rem; }
-    }
+        /* image layer: stable box for main image and temp overlay */
+        .img-layer {
+          position: relative;
+          display: inline-block;
+          max-width: 90vw;
+          max-height: 90vh;
+          width: auto;
+          height: auto;
+        }
+        .img-layer img {
+          display: block;
+          max-width: 90vw;
+          max-height: 90vh;
+          width: auto;
+          height: auto;
+          border: 0.5vw solid #fff;
+          border-radius: 12px;
+          box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+          transition: transform 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.45s cubic-bezier(.2,.9,.2,1);
+          will-change: transform, opacity;
+          background: #000;
+        }
 
-    /* ---------- Other page styles (unchanged) ---------- */
-    header {
-      background: url('home-bg.png') center/cover no-repeat;
-      background-attachment: fixed;
-      height: 100vh;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      position:relative;
-    }
-    header::after {
-      content:"";
-      position:absolute; top:0; left:0; width:100%; height:100%;
-      background:radial-gradient(circle, rgba(139,0,0,0.6) 0%, rgba(0,0,0,0.9) 100%);
-    }
-    header h1, header h2 { color:#fff; font-weight:normal; position:relative; z-index:1; margin:0; text-shadow:2px 2px 10px rgba(0,0,0,0.7); }
-    header h1 { font-size: clamp(2.5rem, 6vw, 6rem); }
-    header h2 { font-size: clamp(1.8rem, 4vw, 4rem); }
+        /* temp image absolute overlay */
+        .img-temp {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 2;
+          pointer-events: none;
+        }
 
-    .gallery {
-      background-color: var(--dark);
-      position:relative;
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      gap: clamp(1rem, 2vw, 2rem);
-      padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 3vw, 3rem);
-    }
-    .gallery a {
-      display:block; border-radius:12px; border:3px solid #fff;
-      box-shadow:0 6px 15px rgba(0,0,0,0.2);
-      transition:transform 0.3s ease, box-shadow 0.3s ease; overflow:hidden; background:#111;
-    }
-    .gallery a:hover { transform:scale(1.05); box-shadow:0 0 35px rgba(255,200,200,0.9); }
-    .gallery img { width:100%; height:100%; object-fit:cover; aspect-ratio:1/1; display:block; border-radius:12px; }
+        /* main image sits below temp */
+        #lightbox-img { position: relative; z-index: 1; }
 
-    .lightbox {
-      position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center;
-      opacity:0; visibility:hidden; transition:opacity 0.35s ease; z-index:2000;
-    }
-    .lightbox.active { opacity:1; visibility:visible; }
+        /* slide classes */
+        .slide-out-left { transform: translateX(-30px); opacity: 0; }
+        .slide-out-right { transform: translateX(30px); opacity: 0; }
+        .slide-in-from-right { transform: translateX(30px); opacity: 0; }
+        .slide-in-from-left { transform: translateX(-30px); opacity: 0; }
+        .slide-in-active { transform: translateX(0); opacity: 1; }
 
-    .lightbox-content {
-      position:relative; display:inline-block; max-width:90vw; max-height:90vh; text-align:center;
-      transition: transform 0.35s ease, opacity 0.35s ease;
-      will-change: transform, opacity;
-    }
+        /* fade-close */
+        .fade-close { transform: scale(0.98); opacity: 0; }
 
-    .img-layer { position: relative; display:inline-block; max-width:90vw; max-height:90vh; }
-    .img-layer img {
-      display:block; max-width:90vw; max-height:90vh; border: 0.5vw solid #fff; border-radius:12px;
-      box-shadow:0 12px 30px rgba(0,0,0,0.7); transition: transform 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.45s cubic-bezier(.2,.9,.2,1);
-      background:#000;
-    }
-    .img-temp { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:2; pointer-events:none; }
-    #lightbox-img { position: relative; z-index:1; }
+        /* Close button */
+        .close { position:absolute; bottom:10px; right:15px; color:#fff; font-size:1.5rem; background:rgba(0,0,0,0.5); padding:0.2rem 0.6rem; border-radius:6px; border:none; cursor:pointer; }
+        .close:hover { background:rgba(255,255,255,0.3); color:#f5cccc; }
 
-    .slide-out-left { transform: translateX(-30px); opacity: 0; }
-    .slide-out-right { transform: translateX(30px); opacity: 0; }
-    .slide-in-from-right { transform: translateX(30px); opacity: 0; }
-    .slide-in-from-left { transform: translateX(-30px); opacity: 0; }
-    .slide-in-active { transform: translateX(0); opacity: 1; }
+        .caption { color:#fff; text-align:center; margin-top:1rem; font-size:1.2rem; font-family:'Courier New', Courier, monospace; }
 
-    .fade-close { transform: scale(0.98); opacity: 0; }
+        .prev, .next {
+          position:absolute; top:50%; transform:translateY(-50%);
+          background:rgba(0,0,0,0.5); color:#fff; font-size:clamp(1.5rem,4vw,2rem);
+          padding:clamp(0.2rem,1vw,0.4rem) clamp(0.4rem,2vw,0.8rem);
+          border:none; border-radius:6px; cursor:pointer; z-index:2010;
+        }
+        .prev { left:10px; } .next { right:10px; }
+        .prev:hover, .next:hover { background:rgba(255,255,255,0.3); color:#f5cccc; }
 
-    .prev, .next {
-      position:absolute; top:50%; transform:translateY(-50%);
-      background:rgba(0,0,0,0.5); color:#fff; font-size:clamp(1.5rem,4vw,2rem);
-      padding:clamp(0.2rem,1vw,0.4rem) clamp(0.4rem,2vw,0.8rem);
-      border:none; border-radius:6px; cursor:pointer; z-index:2010;
-    }
-    .prev { left:10px; } .next { right:10px; }
-    .prev:hover, .next:hover { background:rgba(255,255,255,0.3); color:var(--light); }
+        @media (max-width:480px) {
+          header { background-attachment: scroll; }
+          .gallery { grid-template-columns: 1fr; }
+          .caption { font-size:1rem; }
+          .prev, .next { font-size:1.4rem; padding:0.2rem 0.4rem; }
+        }
 
-    .caption { color:#fff; text-align:center; margin-top:1rem; font-size:1.2rem; font-family:'Courier New', Courier, monospace; }
-    .close { position:absolute; bottom:10px; right:15px; color:#fff; font-size:1.5rem; background:rgba(0,0,0,0.5); padding:0.2rem 0.6rem; border-radius:6px; border:none; cursor:pointer; }
-    .close:hover { background:rgba(255,255,255,0.3); color:var(--light); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width:12px; }
-    ::-webkit-scrollbar-track { background:var(--dark); border-radius:6px; }
-    ::-webkit-scrollbar-thumb { background:var(--accent); border-radius:6px; border:2px solid var(--dark); }
-    ::-webkit-scrollbar-thumb:hover { background:var(--light); }
-    * { scrollbar-width: thin; scrollbar-color: var(--accent) var(--dark); }
-  </style>
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:12px; }
+        ::-webkit-scrollbar-track { background:#0d0000; border-radius:6px; }
+        ::-webkit-scrollbar-thumb { background:#8b0000; border-radius:6px; border:2px solid #0d0000; }
+        ::-webkit-scrollbar-thumb:hover { background:#f5cccc; }
+        * { scrollbar-width: thin; scrollbar-color: #8b0000 #0d0000; }
+    </style>
 </head>
 <body>
-  <!-- Navigation (desktop/default) -->
-  <nav class="main-nav" role="navigation" aria-label="Main navigation">
-    <div class="nav-left">
-      <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
-        <img src="menu-icon.png" alt="Menu" width="28" height="28" />
-      </button>
-      <div class="nav-label">KaiserCKAeterna</div>
+<!-- Navigation -->
+<nav>
+    <!-- hamburger moved before label so it's left-most on mobile; desktop unaffected because .hamburger is hidden -->
+    <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <img src="icon.png" alt="Menu" width="28" height="28" />
+    </button>
+
+    <div class="nav-label">KaiserCKAeterna</div>
+
+    <div class="nav-links" role="navigation" aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#gallery">Gallery</a>
     </div>
+</nav>
+<div class="menu-overlay" aria-hidden="true"></div>
 
-    <div class="nav-links">
-      <a href="#home">Home</a>
-      <a href="#gallery">Gallery</a>
-    </div>
-  </nav>
-
-  <!-- overlay and mobile-only sliding panel -->
-  <div class="menu-overlay" aria-hidden="true"></div>
-
-  <nav class="mobile-panel" id="mobilePanel" aria-hidden="true">
-    <a href="#home">Home</a>
-    <a href="#gallery">Gallery</a>
-  </nav>
-
-  <!-- Home -->
-  <header id="home">
+<!-- Home -->
+<header id="home">
     <h1>Aeterna's</h1>
     <h2>Gallery</h2>
-  </header>
+</header>
 
-  <!-- Gallery -->
-  <section id="gallery" class="gallery" aria-label="Artwork gallery">
+<!-- Gallery -->
+<section id="gallery" class="gallery" aria-label="Artwork gallery">
     <a href="#" data-img="Kit Bodega v2.png" data-caption="Kit Bodega Fan Art"><img src="Kit Bodega v2.png" alt="Kit Bodega Fan Art" loading="lazy"></a>
     <a href="#" data-img="Erika sitting (watermark).png" data-caption="Erika The Fennec"><img src="Erika sitting (watermark).png" alt="Erika The Fennec" loading="lazy"></a>
     <a href="#" data-img="Victoria The Bunny (Final).png" data-caption="Victoria The Bunny"><img src="Victoria The Bunny (Final).png" alt="Victoria The Bunny" loading="lazy"></a>
     <a href="#" data-img="Sekhmet (Watermark).png" data-caption="Sekhmet Fan Art"><img src="Sekhmet (Watermark).png" alt="Sekhmet Fan Art" loading="lazy"></a>
-  </section>
+</section>
 
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="lightbox-content" role="document">
-      <button class="prev" aria-label="Previous image">&#10094;</button>
+        <button class="prev" aria-label="Previous image">&#10094;</button>
 
-      <div class="img-layer" id="img-layer" aria-hidden="false">
-        <img id="lightbox-img" src="" alt="Expanded view" />
-      </div>
+        <div class="img-layer" id="img-layer" aria-hidden="false">
+            <img id="lightbox-img" src="" alt="Expanded view" />
+        </div>
 
-      <button class="next" aria-label="Next image">&#10095;</button>
-      <button class="close" aria-label="Close lightbox">&times;</button>
-      <div class="caption" id="lightbox-caption" aria-live="polite"></div>
+        <button class="next" aria-label="Next image">&#10095;</button>
+        <button class="close" aria-label="Close lightbox">&times;</button>
+        <div class="caption" id="lightbox-caption" aria-live="polite"></div>
     </div>
-  </div>
+</div>
 
-  <!-- Footer -->
-  <footer style="text-align:center; padding:1rem; background:var(--dark); color:#fff; font-family:'Courier New', Courier, monospace;">
+<!-- Copyright Notice -->
+<footer style="text-align:center; padding:1rem; background:#0d0000; color:#fff; font-family:'Courier New', Courier, monospace;">
     © 2026 KaiserCKAeterna
-  </footer>
+</footer>
 
-  <!-- JS -->
-  <script>
-    // Nav scroll behavior (applies to main-nav)
-    const mainNav = document.querySelector('nav.main-nav');
+<!-- JS -->
+<script>
+    // Nav scroll behavior
+    const nav = document.querySelector('nav');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) mainNav.classList.add('scrolled');
-      else mainNav.classList.remove('scrolled');
+      if (window.scrollY > 50) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
     });
 
-    // Mobile menu elements and helpers (mobile-only behavior)
+    // Mobile menu elements and helpers
     const hamburger = document.querySelector('.hamburger');
-    const mobilePanel = document.getElementById('mobilePanel');
-    const desktopLinks = document.querySelector('.nav-links');
+    const navLinks = document.querySelector('.nav-links');
     const overlay = document.querySelector('.menu-overlay');
     const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
-
     function setNavPointerForMobile(enabled) {
-      if (isMobile()) mobilePanel.style.pointerEvents = enabled ? 'auto' : 'none';
-      else mobilePanel.style.pointerEvents = 'auto';
+      if (isMobile()) navLinks.style.pointerEvents = enabled ? 'auto' : 'none';
+      else navLinks.style.pointerEvents = 'auto';
     }
-
     function openMenu() {
-      mobilePanel.classList.add('active');
-      overlay.classList.add('active');
-      hamburger.setAttribute('aria-expanded', 'true');
-      mobilePanel.setAttribute('aria-hidden', 'false');
-      overlay.setAttribute('aria-hidden', 'false');
+      navLinks.classList.add('active'); overlay.classList.add('active');
+      hamburger.setAttribute('aria-expanded', 'true'); overlay.setAttribute('aria-hidden', 'false');
       setNavPointerForMobile(true);
     }
-
     function closeMenu() {
-      mobilePanel.classList.remove('active');
-      overlay.classList.remove('active');
-      hamburger.setAttribute('aria-expanded', 'false');
-      mobilePanel.setAttribute('aria-hidden', 'true');
-      overlay.setAttribute('aria-hidden', 'true');
-      setTimeout(() => { if (!mobilePanel.classList.contains('active')) setNavPointerForMobile(false); }, 380);
+      navLinks.classList.remove('active'); overlay.classList.remove('active');
+      hamburger.setAttribute('aria-expanded', 'false'); overlay.setAttribute('aria-hidden', 'true');
+      setTimeout(() => { if (!navLinks.classList.contains('active')) setNavPointerForMobile(false); }, 400);
     }
-
-    // Toggle menu on hamburger click
-    hamburger.addEventListener('click', () => mobilePanel.classList.contains('active') ? closeMenu() : openMenu());
+    hamburger.addEventListener('click', () => navLinks.classList.contains('active') ? closeMenu() : openMenu());
     overlay.addEventListener('click', closeMenu);
+    window.addEventListener('resize', () => setNavPointerForMobile(navLinks.classList.contains('active')));
+    setNavPointerForMobile(false);
+    document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => { if (isMobile()) closeMenu(); }));
 
-    // Close mobile panel when a link is clicked (mobile only)
-    mobilePanel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { if (isMobile()) closeMenu(); }));
-
-    // Keep desktop links visible on wide screens and hide mobile panel
-    function handleResize() {
-      if (!isMobile()) {
-        desktopLinks.style.display = 'flex';
-        mobilePanel.classList.remove('active');
-        overlay.classList.remove('active');
-        setNavPointerForMobile(false);
-      } else {
-        desktopLinks.style.display = 'none';
-      }
-    }
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    // Lightbox elements (unchanged)
+    // Lightbox elements
     const lightbox = document.getElementById('lightbox');
     const lightboxContent = document.querySelector('.lightbox-content');
     const imgLayer = document.getElementById('img-layer');
@@ -363,16 +321,19 @@
     let currentIndex = 0;
     let animating = false;
 
+    // Helper to create temp image overlay that exactly matches main image box
     function createTempImage(src, alt) {
       const temp = document.createElement('img');
       temp.className = 'img-temp';
       temp.src = src;
       temp.alt = alt || '';
+      // ensure it inherits sizing rules
       temp.style.maxWidth = getComputedStyle(lightboxImg).maxWidth;
       temp.style.maxHeight = getComputedStyle(lightboxImg).maxHeight;
       return temp;
     }
 
+    // immediate show (no slide)
     function showImageImmediate(index) {
       const link = galleryLinks[index];
       const src = link.getAttribute('data-img');
@@ -386,6 +347,7 @@
       nextBtn.focus();
     }
 
+    // animate transition to new index with direction 'next' or 'prev'
     function animateTo(index, direction) {
       if (animating) return;
       animating = true;
@@ -394,12 +356,15 @@
       const newSrc = link.getAttribute('data-img');
       const newCaption = link.getAttribute('data-caption') || '';
 
+      // create temp image and place it exactly over the main image
       const temp = createTempImage(newSrc, newCaption);
       temp.classList.add(direction === 'next' ? 'slide-in-from-right' : 'slide-in-from-left');
       imgLayer.appendChild(temp);
 
+      // force reflow so transitions will run
       void temp.offsetWidth;
 
+      // animate outgoing main image and incoming temp
       if (direction === 'next') {
         lightboxImg.classList.add('slide-out-left');
         temp.classList.remove('slide-in-from-right');
@@ -410,24 +375,33 @@
         temp.classList.add('slide-in-active');
       }
 
+      // when incoming temp finishes transition, swap main image src and cleanup
       const onTempEnd = (e) => {
         if (e.target !== temp) return;
         temp.removeEventListener('transitionend', onTempEnd);
 
+        // set main image to new src (temp covered the change)
         lightboxImg.src = newSrc;
         lightboxImg.alt = newCaption || 'Expanded view';
         lightboxCaption.textContent = newCaption;
+
+        // remove outgoing classes from main image
         lightboxImg.classList.remove('slide-out-left', 'slide-out-right');
 
+        // remove temp element
         if (temp.parentNode) temp.parentNode.removeChild(temp);
 
+        // small timeout to ensure DOM settled
         setTimeout(() => { animating = false; }, 20);
       };
 
       temp.addEventListener('transitionend', onTempEnd);
+
+      // update current index
       currentIndex = index;
     }
 
+    // close with fade animation on content
     function closeLightbox() {
       if (!lightbox.classList.contains('active')) return;
       lightboxContent.classList.add('fade-close');
@@ -444,10 +418,11 @@
       lightboxContent.addEventListener('transitionend', onCloseEnd);
     }
 
+    // wire thumbnails to open (use immediate open if lightbox closed)
     galleryLinks.forEach((link, index) => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        if (mobilePanel.classList.contains('active')) closeMenu();
+        if (navLinks.classList.contains('active')) closeMenu();
         if (!lightbox.classList.contains('active')) {
           showImageImmediate(index);
         } else {
@@ -457,6 +432,7 @@
       });
     });
 
+    // prev/next handlers
     prevBtn.addEventListener('click', () => {
       if (animating) return;
       const nextIndex = (currentIndex - 1 + galleryLinks.length) % galleryLinks.length;
@@ -468,9 +444,11 @@
       animateTo(nextIndex, 'next');
     });
 
+    // Close handlers
     closeBtn.addEventListener('click', (e) => { e.preventDefault(); closeLightbox(); });
     lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 
+    // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (lightbox.classList.contains('active')) {
         if (e.key === 'Escape') closeLightbox();
@@ -482,7 +460,7 @@
           animateTo(nextIndex, 'next');
         }
       } else {
-        if (e.key === 'Escape' && mobilePanel.classList.contains('active')) closeMenu();
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) closeMenu();
       }
     });
 
@@ -492,6 +470,6 @@
       else document.body.style.overflow = '';
     });
     observer.observe(lightbox, { attributes: true, attributeFilter: ['class'] });
-  </script>
+</script>
 </body>
 </html>
